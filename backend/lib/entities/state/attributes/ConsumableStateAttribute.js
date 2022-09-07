@@ -18,19 +18,6 @@ class ConsumableStateAttribute extends StateAttribute {
 
         this.remaining = options.remaining;
     }
-
-    /**
-     *
-     * @param {ConsumableStateAttribute} otherAttribute
-     * @return {boolean}
-     */
-    equals(otherAttribute) {
-        return this.__class === otherAttribute.__class &&
-               this.type === otherAttribute.type &&
-               this.subType === otherAttribute.subType &&
-               this.remaining.value === otherAttribute.remaining.value &&
-               this.remaining.unit === otherAttribute.remaining.unit;
-    }
 }
 
 /**
@@ -54,6 +41,7 @@ ConsumableStateAttribute.SUB_TYPE = Object.freeze({
     NONE: "none",
     ALL: "all",
     MAIN: "main",
+    SECONDARY: "secondary",
     SIDE_LEFT: "side_left",
     SIDE_RIGHT: "side_right"
 });

@@ -1,27 +1,27 @@
-const Logger = require("../../Logger");
-
 const CapabilityRouter = require("./CapabilityRouter");
 const ValetudoDNDConfiguration = require("../../entities/core/ValetudoDNDConfiguration");
 
 class DoNotDisturbCapabilityRouter extends CapabilityRouter {
-
     initRoutes() {
         this.router.get("/", async (req, res) => {
-            res.json(await this.capability.getDndConfiguration());
+            try {
+                res.json(await this.capability.getDndConfiguration());
+            } catch (e) {
+                this.sendErrorResponse(req, res, e);
+            }
         });
 
-        this.router.put("/", async (req, res) => {
-            if (req.body && req.body.start && req.body.end) {
+        this.router.put("/", this.validator, async (req, res) => {
+            if (req.body.start && req.body.end) {
                 try {
                     await this.capability.setDndConfiguration(new ValetudoDNDConfiguration(req.body));
 
                     res.sendStatus(200);
                 } catch (e) {
-                    Logger.warn("Error while configuring do not disturb setting", e);
-                    res.status(500).json(e.message);
+                    this.sendErrorResponse(req, res, e);
                 }
             } else {
-                res.status(400).send("Missing parameters in request body");
+                res.sendStatus(400);
             }
         });
     }

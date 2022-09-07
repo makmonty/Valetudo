@@ -86,28 +86,6 @@ const fakeConfig = {
     onUpdate: (_) => {
     },
     get: key => fakeConfig[key],
-    "goToLocationPresets": {
-        "a9666386-7041-4bd4-a823-ebefa48665eb": {
-            "__class": "ValetudoGoToLocation",
-            "metaData": {},
-            "name": "SpotA",
-            "coordinates": {
-                "x": 2589,
-                "y": 2364
-            },
-            "id": "a9666386-7041-4bd4-a823-ebefa48665eb"
-        },
-        "6c74ac84-dfe9-4c4c-8bec-836ff268d630": {
-            "__class": "ValetudoGoToLocation",
-            "metaData": {},
-            "name": "SpotB",
-            "coordinates": {
-                "x": 2186,
-                "y": 2262
-            },
-            "id": "6c74ac84-dfe9-4c4c-8bec-836ff268d630"
-        }
-    },
 };
 const eventStore = new ValetudoEventStore()
 
@@ -283,7 +261,7 @@ class FakeMqttController extends MqttController {
 
         // Give time for the status attributes to propagate
         setTimeout(() => {
-            this.setState("sentinel").then();
+            this.setState("sentinel").catch(err => {console.error(err)});
         }, 500);
 
         // Promise resolved/rejected by doGenerateDocs(), in turn called when Homie state == ready by setState().

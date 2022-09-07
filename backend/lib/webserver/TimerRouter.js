@@ -1,9 +1,7 @@
 const BasicControlCapability = require("../core/capabilities/BasicControlCapability");
 const express = require("express");
-const GoToLocationCapability = require("../core/capabilities/GoToLocationCapability");
 const MapSegmentationCapability = require("../core/capabilities/MapSegmentationCapability");
 const ValetudoTimer = require("../entities/core/ValetudoTimer");
-const ZoneCleaningCapability = require("../core/capabilities/ZoneCleaningCapability");
 
 class TimerRouter {
     /**
@@ -42,14 +40,6 @@ class TimerRouter {
                 response.supportedActions.push(ValetudoTimer.ACTION_TYPE.SEGMENT_CLEANUP);
             }
 
-            if (this.robot.hasCapability(ZoneCleaningCapability.TYPE)) {
-                response.supportedActions.push(ValetudoTimer.ACTION_TYPE.ZONE_CLEANUP);
-            }
-
-            if (this.robot.hasCapability(GoToLocationCapability.TYPE)) {
-                response.supportedActions.push(ValetudoTimer.ACTION_TYPE.GOTO_LOCATION);
-            }
-
             res.json(response);
         });
 
@@ -83,13 +73,13 @@ class TimerRouter {
                 storedTimers[newTimer.id] = newTimer;
 
                 this.config.set("timers", storedTimers);
-                res.sendStatus(201);
+                res.sendStatus(200);
             } else {
                 res.sendStatus(400);
             }
         });
 
-        this.router.post("/:id", this.validator, (req, res) => {
+        this.router.put("/:id", this.validator, (req, res) => {
             const storedTimers = this.config.get("timers");
 
             if (storedTimers[req.params.id]) {

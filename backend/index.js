@@ -1,9 +1,9 @@
 #!/usr/bin/env node
+
 const Logger = require("./lib/Logger");
-const process = require("process");
 const Valetudo = require("./lib/Valetudo");
 
-var valetudo = new Valetudo();
+const valetudo = new Valetudo();
 
 process.on("unhandledRejection", (reason, promise) => {
     Logger.error("unhandledRejection", {

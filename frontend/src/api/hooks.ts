@@ -19,7 +19,6 @@ import {
     fetchCurrentStatistics,
     fetchCurrentStatisticsProperties,
     fetchDoNotDisturbConfiguration,
-    fetchGoToLocationPresets,
     fetchHTTPBasicAuthConfiguration,
     fetchKeyLockState,
     fetchManualControlProperties,
@@ -49,7 +48,6 @@ import {
     fetchValetudoLogLevel,
     fetchVoicePackManagementState,
     fetchWifiStatus,
-    fetchZonePresets,
     fetchZoneProperties,
     sendAutoEmptyDockAutoEmptyControlEnable,
     sendAutoEmptyDockManualTriggerCommand,
@@ -57,12 +55,10 @@ import {
     sendCarpetModeEnable,
     sendCleanSegmentsCommand,
     sendCleanTemporaryZonesCommand,
-    sendCleanZonePresetCommand,
     sendCombinedVirtualRestrictionsUpdate,
     sendConsumableReset,
     sendDoNotDisturbConfiguration,
     sendGoToCommand,
-    sendGoToLocationPresetCommand,
     sendHTTPBasicAuthConfiguration,
     sendJoinSegmentsCommand,
     sendKeyLockEnable,
@@ -91,6 +87,11 @@ import {
     fetchValetudoInformation,
     fetchQuirks,
     sendSetQuirkValueCommand,
+    fetchRobotProperties,
+    fetchMQTTStatus,
+    fetchNetworkAdvertisementConfiguration,
+    fetchNetworkAdvertisementProperties,
+    sendNetworkAdvertisementConfiguration,
 } from "./client";
 import {
     PresetSelectionState,
@@ -111,6 +112,7 @@ import {
     MapSegmentEditSplitRequestParameters,
     MapSegmentRenameRequestParameters,
     MQTTConfiguration,
+    NetworkAdvertisementConfiguration,
     NTPClientConfiguration,
     NTPClientState,
     Point,
@@ -118,6 +120,7 @@ import {
     Timer,
     ValetudoEventInteractionContext,
     VoicePackManagementCommand,
+    WifiConfiguration,
     Zone,
 } from "./types";
 import {MutationFunction} from "react-query/types/core/types";
@@ -128,11 +131,9 @@ enum CacheKey {
     Consumables = "consumables",
     Attributes = "attributes",
     PresetSelections = "preset_selections",
-    ZonePresets = "zone_presets",
     ZoneProperties = "zone_properties",
     Segments = "segments",
     MapSegmentationProperties = "map_segmentation_properties",
-    GoToLocationPresets = "go_to_location_presets",
     PersistentData = "persistent_data",
     RobotInformation = "robot_information",
     ValetudoInformation = "valetudo_information",
@@ -143,8 +144,11 @@ enum CacheKey {
     SystemHostInfo = "system_host_info",
     SystemRuntimeInfo = "system_runtime_info",
     MQTTConfiguration = "mqtt_configuration",
+    MQTTStatus = "mqtt_status",
     MQTTProperties = "mqtt_properties",
     HTTPBasicAuth = "http_basic_auth",
+    NetworkAdvertisementConfiguration = "network_advertisement_configuration",
+    NetworkAdvertisementProperties = "network_advertisement_properties",
     NTPClientState = "ntp_client_state",
     NTPClientConfiguration = "ntp_client_configuration",
     Timers = "timers",
@@ -164,7 +168,8 @@ enum CacheKey {
     CurrentStatisticsProperties = "current_statistics_properties",
     TotalStatistics = "total_statistics",
     TotalStatisticsProperties = "total_statistics_properties",
-    Quirks = "quirks"
+    Quirks = "quirks",
+    RobotProperties = "robot_properties"
 }
 
 const useOnCommandError = (capability: Capability | string): ((error: unknown) => void) => {
@@ -376,37 +381,10 @@ export const useGoToMutation = (
     );
 };
 
-export const useZonePresetsQuery = () => {
-    return useQuery(CacheKey.ZonePresets, fetchZonePresets);
-};
-
 export const useZonePropertiesQuery = () => {
     return useQuery(CacheKey.ZoneProperties, fetchZoneProperties, {
         staleTime: Infinity,
     });
-};
-
-export const useCleanZonePresetMutation = (
-    options?: UseMutationOptions<RobotAttribute[], unknown, string>
-) => {
-    const queryClient = useQueryClient();
-    const onError = useOnCommandError(Capability.ZoneCleaning);
-
-    return useMutation(
-        (id: string) => {
-            return sendCleanZonePresetCommand(id).then(fetchStateAttributes);
-        },
-        {
-            onError,
-            ...options,
-            async onSuccess(data, ...args) {
-                queryClient.setQueryData<RobotAttribute[]>(CacheKey.Attributes, data, {
-                    updatedAt: Date.now(),
-                });
-                await options?.onSuccess?.(data, ...args);
-            },
-        }
-    );
 };
 
 export const useCleanTemporaryZonesMutation = (
@@ -436,9 +414,12 @@ export const useSegmentsQuery = () => {
     return useQuery(CacheKey.Segments, fetchSegments);
 };
 
-export const useMapSegmentationPropertiesQuery = () => {
+// As conditional hooks aren't allowed, this query needs a way to be disabled but referenced
+// for cases where a component might need the properties but only if the capability exists
+export const useMapSegmentationPropertiesQuery = (enabled?: boolean) => {
     return useQuery(CacheKey.MapSegmentationProperties, fetchMapSegmentationProperties, {
-        staleTime: Infinity
+        staleTime: Infinity,
+        enabled: enabled ?? true
     });
 };
 
@@ -520,33 +501,6 @@ export const useRenameSegmentMutation = (
     return useMutation(
         (parameters: MapSegmentRenameRequestParameters) => {
             return sendRenameSegmentCommand(parameters).then(fetchStateAttributes); //TODO: this should actually refetch the map
-        },
-        {
-            onError,
-            ...options,
-            async onSuccess(data, ...args) {
-                queryClient.setQueryData<RobotAttribute[]>(CacheKey.Attributes, data, {
-                    updatedAt: Date.now(),
-                });
-                await options?.onSuccess?.(data, ...args);
-            },
-        }
-    );
-};
-
-export const useGoToLocationPresetsQuery = () => {
-    return useQuery(CacheKey.GoToLocationPresets, fetchGoToLocationPresets);
-};
-
-export const useGoToLocationPresetMutation = (
-    options?: UseMutationOptions<RobotAttribute[], unknown, string>
-) => {
-    const queryClient = useQueryClient();
-    const onError = useOnCommandError(Capability.ZoneCleaning);
-
-    return useMutation(
-        (id: string) => {
-            return sendGoToLocationPresetCommand(id).then(fetchStateAttributes);
         },
         {
             onError,
@@ -645,6 +599,13 @@ export const useMQTTConfigurationMutation = () => {
     );
 };
 
+export const useMQTTStatusQuery = () => {
+    return useQuery(CacheKey.MQTTStatus, fetchMQTTStatus, {
+        staleTime: 5_000,
+        refetchInterval: 5_000
+    });
+};
+
 export const useMQTTPropertiesQuery = () => {
     return useQuery(CacheKey.MQTTProperties, fetchMQTTProperties, {
         staleTime: Infinity,
@@ -665,6 +626,28 @@ export const useHTTPBasicAuthConfigurationMutation = () => {
             return sendHTTPBasicAuthConfiguration(configuration).then(fetchHTTPBasicAuthConfiguration);
         }
     );
+};
+
+export const useNetworkAdvertisementConfigurationQuery = () => {
+    return useQuery(CacheKey.NetworkAdvertisementConfiguration, fetchNetworkAdvertisementConfiguration, {
+        staleTime: Infinity,
+    });
+};
+
+export const useNetworkAdvertisementConfigurationMutation = () => {
+    return useValetudoFetchingMutation(
+        useOnSettingsChangeError("Network Advertisement"),
+        CacheKey.NetworkAdvertisementConfiguration,
+        (networkAdvertisementConfiguration: NetworkAdvertisementConfiguration) => {
+            return sendNetworkAdvertisementConfiguration(networkAdvertisementConfiguration).then(fetchNetworkAdvertisementConfiguration);
+        }
+    );
+};
+
+export const useNetworkAdvertisementPropertiesQuery = () => {
+    return useQuery(CacheKey.NetworkAdvertisementProperties, fetchNetworkAdvertisementProperties, {
+        staleTime: Infinity,
+    });
 };
 
 export const useNTPClientStateQuery = () => {
@@ -932,7 +915,9 @@ export const useWifiStatusQuery = () => {
     });
 };
 
-export const useWifiConfigurationMutation = () => {
+export const useWifiConfigurationMutation = (
+    options?: UseMutationOptions<void, unknown, WifiConfiguration>
+) => {
     const {
         refetch: refetchWifiStatus,
     } = useWifiStatusQuery();
@@ -941,8 +926,12 @@ export const useWifiConfigurationMutation = () => {
         sendWifiConfiguration,
         {
             onError: useOnCommandError(Capability.WifiConfiguration),
-            onSuccess() {
-                refetchWifiStatus().catch(() => {/*intentional*/});
+            async onSuccess(data, ...args) {
+                refetchWifiStatus().catch(() => {
+                    /*intentional*/
+                });
+
+                await options?.onSuccess?.(data, ...args);
             }
         }
     );
@@ -1067,4 +1056,10 @@ export const useSetQuirkValueMutation = () => {
             }
         }
     );
+};
+
+export const useRobotPropertiesQuery = () => {
+    return useQuery(CacheKey.RobotProperties, fetchRobotProperties, {
+        staleTime: Infinity,
+    });
 };

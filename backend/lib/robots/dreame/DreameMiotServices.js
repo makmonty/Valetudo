@@ -211,7 +211,7 @@ module.exports = {
                 },
 
                 ACTION_RESULT: {
-                    PIID: 6 //TODO: validate
+                    PIID: 6
                 }
             },
             ACTIONS: {
@@ -310,6 +310,12 @@ module.exports = {
                 OBSTACLE_AVOIDANCE: {
                     PIID: 21
                 },
+                MOP_DOCK_SETTINGS: {
+                    PIID: 23
+                },
+                MOP_DOCK_STATE: {
+                    PIID: 25
+                },
                 KEY_LOCK: {
                     PIID: 27
                 },
@@ -318,6 +324,9 @@ module.exports = {
                 },
                 TIGHT_MOP_PATTERN: {
                     PIID: 29
+                },
+                MOP_DOCK_UV_TREATMENT: {
+                    PIID: 32
                 }
             },
             ACTIONS: {
@@ -448,6 +457,38 @@ module.exports = {
                 }
             }
         },
+        SECONDARY_FILTER: {
+            SIID: 17,
+            PROPERTIES: {
+                TIME_LEFT: { //Hours
+                    PIID: 2
+                },
+                PERCENT_LEFT: {
+                    PIID: 1
+                }
+            },
+            ACTIONS: {
+                RESET: {
+                    AIID: 1
+                }
+            }
+        },
+        MOP: {
+            SIID: 18,
+            PROPERTIES: {
+                TIME_LEFT: { //Hours
+                    PIID: 2
+                },
+                PERCENT_LEFT: {
+                    PIID: 1
+                }
+            },
+            ACTIONS: {
+                RESET: {
+                    AIID: 1
+                }
+            }
+        },
         MAP: {
             SIID: 6,
             PROPERTIES: {
@@ -524,6 +565,9 @@ module.exports = {
                     AIID: 1
                 }
             }
+        },
+        TIMERS: {
+            SIID: 8
         }
     })
 };

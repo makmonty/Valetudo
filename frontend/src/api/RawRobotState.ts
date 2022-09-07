@@ -48,9 +48,11 @@ export interface PresetSelectionState {
     customValue?: number;
 }
 
+export type AttachmentStateAttributeType = "dustbin" | "watertank" | "mop";
+
 export interface AttachmentState {
     __class: RobotAttributeClass.AttachmentState;
-    type: "dustbin" | "watertank" | "mop";
+    type: AttachmentStateAttributeType;
     attached: boolean;
 }
 
@@ -58,15 +60,6 @@ export interface OperationModeState {
     __class: RobotAttributeClass.OperationModeState;
     value: "vacuum" | "mop" | "vacuum_and_mop";
 }
-
-// export interface ConsumableState {
-//   type: 'filter' | 'brush' | 'sensor' | 'mop';
-//   subType: 'none' | 'all' | 'main' | 'side_left' | 'side_right';
-//   remaining: {
-//     value: number;
-//     unit: 'minutes' | 'percent';
-//   };
-// }
 
 export type RobotAttribute =
     | StatusState

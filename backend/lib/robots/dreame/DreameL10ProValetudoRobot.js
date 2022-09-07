@@ -3,8 +3,10 @@ const DreameGen2LidarValetudoRobot = require("./DreameGen2LidarValetudoRobot");
 const DreameGen2ValetudoRobot = require("./DreameGen2ValetudoRobot");
 const DreameQuirkFactory = require("./DreameQuirkFactory");
 const DreameValetudoRobot = require("./DreameValetudoRobot");
+const entities = require("../../entities");
 const MiioValetudoRobot = require("../MiioValetudoRobot");
 const QuirksCapability = require("../../core/capabilities/QuirksCapability");
+const ValetudoSelectionPreset = require("../../entities/core/ValetudoSelectionPreset");
 
 class DreameL10ProValetudoRobot extends DreameGen2LidarValetudoRobot {
     /**
@@ -19,6 +21,21 @@ class DreameL10ProValetudoRobot extends DreameGen2LidarValetudoRobot {
         const QuirkFactory = new DreameQuirkFactory({
             robot: this
         });
+
+        this.registerCapability(new capabilities.DreameCarpetModeControlCapability({
+            robot: this,
+            siid: DreameGen2ValetudoRobot.MIOT_SERVICES.VACUUM_2.SIID,
+            piid: DreameGen2ValetudoRobot.MIOT_SERVICES.VACUUM_2.PROPERTIES.CARPET_MODE.PIID
+        }));
+
+        this.registerCapability(new capabilities.DreameWaterUsageControlCapability({
+            robot: this,
+            presets: Object.keys(DreameValetudoRobot.WATER_GRADES).map(k => {
+                return new ValetudoSelectionPreset({name: k, value: DreameValetudoRobot.WATER_GRADES[k]});
+            }),
+            siid: DreameGen2ValetudoRobot.MIOT_SERVICES.VACUUM_2.SIID,
+            piid: DreameGen2ValetudoRobot.MIOT_SERVICES.VACUUM_2.PROPERTIES.WATER_USAGE.PIID
+        }));
 
         this.registerCapability(new capabilities.DreameConsumableMonitoringCapability({
             robot: this,
@@ -73,6 +90,11 @@ class DreameL10ProValetudoRobot extends DreameGen2LidarValetudoRobot {
                 QuirkFactory.getQuirk(DreameQuirkFactory.KNOWN_QUIRKS.TIGHT_MOP_PATTERN),
                 QuirkFactory.getQuirk(DreameQuirkFactory.KNOWN_QUIRKS.OBSTACLE_AVOIDANCE)
             ]
+        }));
+
+        this.state.upsertFirstMatchingAttribute(new entities.state.attributes.AttachmentStateAttribute({
+            type: entities.state.attributes.AttachmentStateAttribute.TYPE.WATERTANK,
+            attached: false
         }));
     }
 

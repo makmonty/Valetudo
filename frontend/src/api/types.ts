@@ -1,3 +1,5 @@
+import {AttachmentStateAttributeType} from "./RawRobotState";
+
 export enum Capability {
     AutoEmptyDockAutoEmptyControl = "AutoEmptyDockAutoEmptyControlCapability",
     AutoEmptyDockManualTrigger = "AutoEmptyDockManualTriggerCapability",
@@ -19,7 +21,6 @@ export enum Capability {
     MapSnapshot = "MapSnapshotCapability",
     MappingPass = "MappingPassCapability",
     PersistentMapControl = "PersistentMapControlCapability",
-    SensorCalibration = "SensorCalibrationCapability",
     SpeakerTest = "SpeakerTestCapability",
     SpeakerVolumeControl = "SpeakerVolumeControlCapability",
     TotalStatistics = "TotalStatisticsCapability",
@@ -45,12 +46,6 @@ export interface Zone {
     iterations: number;
 }
 
-export interface ZonePreset {
-    id: string;
-    name: string;
-    zones: Zone[];
-}
-
 export interface ZoneProperties {
     zoneCount: {
         min: number;
@@ -70,12 +65,6 @@ export interface MapSegmentationProperties {
     customOrderSupport: boolean;
 }
 
-export interface GoToLocation {
-    id: string;
-    name: string;
-    coordinates: Point;
-}
-
 export interface Segment {
     id: string;
     name?: string;
@@ -84,11 +73,15 @@ export interface Segment {
 export interface RobotInformation {
     manufacturer: string;
     modelName: string;
+    modelDetails: {
+        supportedAttachments: Array<AttachmentStateAttributeType>;
+    }
     implementation: string;
 }
 
 export interface ValetudoInformation {
     embedded: boolean;
+    systemId: string;
 }
 
 export interface ValetudoVersion {
@@ -224,6 +217,28 @@ export interface MQTTConfiguration {
     };
 }
 
+export interface MQTTStatus {
+    state: "init" | "ready" | "disconnected" | "lost" | "alert",
+    stats: {
+        messages: {
+            count: {
+                received: number;
+                sent: number;
+            },
+            bytes: {
+                received: number;
+                sent: number;
+            }
+        },
+        connection: {
+            connects: number;
+            disconnects: number;
+            reconnects: number;
+            errors: number;
+        }
+    }
+}
+
 export interface MQTTProperties {
     defaults: {
         identity: {
@@ -240,6 +255,15 @@ export interface HTTPBasicAuthConfiguration {
     enabled: boolean;
     username: string;
     password: string;
+}
+
+export interface NetworkAdvertisementConfiguration {
+    enabled: boolean;
+}
+
+export interface NetworkAdvertisementProperties {
+    port: number;
+    zeroconfHostname: string;
 }
 
 export interface NTPClientState {
@@ -358,6 +382,11 @@ export interface WifiStatus {
     };
 }
 
+export interface WifiProvisioningEncryptionKey {
+    type: "rsa";
+    publicKey: string;
+}
+
 export type ManualControlAction = "enable" | "disable" | "move";
 
 export type ManualControlCommand = "forward" | "backward" | "rotate_clockwise" | "rotate_counterclockwise";
@@ -438,4 +467,8 @@ export interface Quirk {
 export interface SetQuirkValueCommand {
     id: string,
     value: string
+}
+
+export interface RobotProperties {
+    firmwareVersion: string
 }

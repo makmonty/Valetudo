@@ -17,9 +17,9 @@ class DreameMapParser {
      *
      * @param {Buffer} buf
      * @param {MapDataType} [type]
-     * @returns {null|import("../../entities/map/ValetudoMap")}
+     * @returns {Promise<null|import("../../entities/map/ValetudoMap")>}
      */
-    static PARSE(buf, type) {
+    static async PARSE(buf, type) {
         //Maps are always at least 27 bytes in size
         if (!buf || buf.length < HEADER_SIZE) {
             return null;
@@ -90,7 +90,7 @@ class DreameMapParser {
 
             if (additionalData.sa && Array.isArray(additionalData.sa)) {
                 additionalData.sa.forEach(sa => {
-                    activeSegmentIds.push(sa[0]);
+                    activeSegmentIds.push(sa[0].toString());
                 });
             }
 
@@ -111,7 +111,7 @@ class DreameMapParser {
              * after the robot complains about being unable to use the map
              */
             if (additionalData.rism && additionalData.ris === 2) {
-                const rismResult = DreameMapParser.PARSE(DreameMapParser.PREPROCESS(additionalData.rism), MAP_DATA_TYPES.RISM);
+                const rismResult = await DreameMapParser.PARSE(await DreameMapParser.PREPROCESS(additionalData.rism), MAP_DATA_TYPES.RISM);
 
                 if (rismResult instanceof Map.ValetudoMap) {
                     rismResult.entities.forEach(e => {
@@ -136,7 +136,7 @@ class DreameMapParser {
 
                     rismResult.layers.forEach(l => {
                         if (l.metaData.segmentId !== undefined) {
-                            if (activeSegmentIds.includes(parseInt(l.metaData.segmentId))) { //required for the 1C
+                            if (activeSegmentIds.includes(l.metaData.segmentId)) { //required for the 1C
                                 l.metaData.active = true;
                             }
 
@@ -239,6 +239,11 @@ class DreameMapParser {
             }
         } else {
             //Just a header
+            return null;
+        }
+
+        // While the map is technically valid at this point, we still ignore it as we don't need a map with 0 pixels
+        if (layers.length === 0) {
             return null;
         }
 
@@ -394,8 +399,8 @@ class DreameMapParser {
 
         Object.keys(segments).forEach(segmentId => {
             const metaData = {
-                segmentId: parseInt(segmentId),
-                active: activeSegmentIds.includes(parseInt(segmentId)),
+                segmentId: segmentId,
+                active: activeSegmentIds.includes(segmentId),
                 source: type
             };
 
@@ -517,15 +522,26 @@ class DreameMapParser {
      *
      * https://tools.ietf.org/html/rfc4648#section-5
      *
+     * 
      *
-     * @param {any} data
-     * @returns {Buffer|null}
+     * @param {Buffer|string} data
+     * @returns {Promise<Buffer|null>}
      */
-    static PREPROCESS(data) {
+    static async PREPROCESS(data) {
+        // As string.toString() is a no-op, we don't need to check the type beforehand
         const base64String = data.toString().replace(/_/g, "/").replace(/-/g, "+");
 
         try {
-            return zlib.inflateSync(Buffer.from(base64String, "base64"));
+            // intentional return await
+            return await new Promise((resolve, reject) => {
+                zlib.inflate(Buffer.from(base64String, "base64"), (err, result) => {
+                    if (!err) {
+                        resolve(result);
+                    } else {
+                        reject(err);
+                    }
+                });
+            });
         } catch (e) {
             Logger.error("Error while preprocessing map", e);
 

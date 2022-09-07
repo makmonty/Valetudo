@@ -56,18 +56,19 @@ class MapSegmentationCapabilityMqttHandle extends CapabilityMqttHandle {
                 }
             },
             helpText: "This handle accepts a JSON object identical to the one used by the REST API.\n\n" +
+                "Please refer to the \"General Help\" section in Valetudo for more information.\n\n" +
                 "Sample payload:\n\n" +
                 "```json\n" +
-                "{\n" +
-                "  \"segment_ids\": [\n" +
-                "      \"20\",\n"+
-                "      \"18\",\n"+
-                "      \"16\"\n"+
-                "  ],\n"+
-                "  \"iterations\": 2,\n"+
-                "  \"customOrder\": true\n"+
-                "}\n" +
-                "```"
+                JSON.stringify({
+                    segment_ids: [
+                        "20",
+                        "18",
+                        "16"
+                    ],
+                    iterations: 2,
+                    customOrder: true
+                }, null, 2) +
+                "\n```"
         }));
     }
 }

@@ -15,8 +15,6 @@
         },
         "blockExternalAccess": true
     },
-    "zonePresets": {},
-    "goToLocationPresets": {},
     "mqtt": {
         "enabled": false,
         "connection": {
@@ -71,7 +69,7 @@
     "debug": {
         "systemStatInterval" : false,
         "debugHassAnchors": false,
-        "storeRawUploadedMaps": false
+        "storeRawFDSUploads": false
     },
     "networkAdvertisement": {
         "enabled": true
