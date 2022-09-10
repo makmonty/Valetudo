@@ -16,6 +16,8 @@ import {
     Dangerous as VirtualRestrictionsIcon,
     Crop as CleanupCoverageIcon,
     Download as ValetudoMapDownloadIcon,
+    Domain as ZonePresetsIcon,
+    Place as LocationPresetsIcon,
 } from "@mui/icons-material";
 import React from "react";
 import ConfirmationDialog from "../components/ConfirmationDialog";
@@ -248,6 +250,25 @@ const MapManagement = (): JSX.Element => {
         mapSegmentRenameCapabilitySupported
     ]);
 
+    const presetListItems = React.useMemo(() => {
+        return [
+            <LinkListMenuItem
+                key="zonePresetsMap"
+                url="/settings/presets/zones"
+                primaryLabel="Zone presets"
+                secondaryLabel="Save zones of your house for later use"
+                icon={<ZonePresetsIcon/>}
+            />,
+            <LinkListMenuItem
+                key="locationPresetsMap"
+                url="/settings/presets/locations"
+                primaryLabel="Location presets"
+                secondaryLabel="Save locations of your house for later use"
+                icon={<LocationPresetsIcon/>}
+            />,
+        ];
+    }, []);
+
     const utilityMapItems = React.useMemo(() => {
         return [
             <LinkListMenuItem
@@ -268,6 +289,12 @@ const MapManagement = (): JSX.Element => {
                 secondaryHeader={"These features are managed and provided by the robot's firmware"}
                 listItems={robotManagedListItems}
                 helpText={MapManagementHelp}
+            />
+            <ListMenu
+                primaryHeader={"Presets"}
+                secondaryHeader={"Zones and locations"}
+                listItems={presetListItems}
+                helpText={""}
             />
             <ListMenu
                 primaryHeader={"Map Utilities"}

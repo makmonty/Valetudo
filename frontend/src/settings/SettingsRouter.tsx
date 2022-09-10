@@ -11,6 +11,8 @@ import AuthSettings from "./connectivity/AuthSettings";
 import WifiConnectivity from "./connectivity/WifiConnectivity";
 import NetworkAdvertisementSettings from "./connectivity/NetworkAdvertisementSettings";
 import RobotCoverageMapPage from "../map/RobotCoverageMapPage";
+import LocationPresets from "./presets/LocationPresets";
+import ZonePresets from "./presets/ZonePresets";
 
 const SettingsRouter = (): JSX.Element => {
     const {path} = useRouteMatch();
@@ -82,6 +84,12 @@ const SettingsRouter = (): JSX.Element => {
                     <WifiConnectivity/>
                 </Route>
             }
+            <Route exact path={path + "/presets/locations"}>
+                <LocationPresets/>
+            </Route>
+            <Route exact path={path + "/presets/zones"}>
+                <ZonePresets/>
+            </Route>
             <Route path="*">
                 <h3>Unknown route</h3>
             </Route>

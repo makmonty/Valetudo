@@ -12,10 +12,13 @@ import VirtualWallClientStructure from "./structures/client_structures/VirtualWa
 import VirtualRestrictionActions from "./actions/edit_map_actions/VirtualRestrictionActions";
 import NoGoAreaClientStructure from "./structures/client_structures/NoGoAreaClientStructure";
 import NoMopAreaClientStructure from "./structures/client_structures/NoMopAreaClientStructure";
+import GoToTargetClientStructure from "./structures/client_structures/GoToTargetClientStructure";
+import ZoneActions from './actions/live_map_actions/ZoneActions';
 import HelpDialog from "../components/HelpDialog";
 import HelpAction from "./actions/edit_map_actions/HelpAction";
+import ZoneClientStructure from "./structures/client_structures/ZoneClientStructure";
 
-export type mode = "segments" | "virtual_restrictions";
+export type mode = "segments" | "virtual_restrictions" | "zones" | "locations";
 
 interface EditMapProps extends MapProps {
     supportedCapabilities: {
@@ -37,6 +40,9 @@ interface EditMapState extends MapState {
     noGoAreas: Array<NoGoAreaClientStructure>,
     noMopAreas: Array<NoMopAreaClientStructure>,
 
+    zones: Array<ZoneClientStructure>,
+    locations: Array<GoToTargetClientStructure>,
+
     helpDialogOpen: boolean
 }
 
@@ -54,6 +60,9 @@ class EditMap extends Map<EditMapProps, EditMapState> {
             virtualWalls: [],
             noGoAreas: [],
             noMopAreas: [],
+
+            zones: [],
+            locations: [],
 
             helpDialogOpen: false
         };
@@ -143,7 +152,17 @@ class EditMap extends Map<EditMapProps, EditMapState> {
                 if (s.type === NoMopAreaClientStructure.TYPE) {
                     return true;
                 }
-            }) as Array<NoMopAreaClientStructure>
+            }) as Array<NoMopAreaClientStructure>,
+            zones: this.structureManager.getClientStructures().filter(s => {
+                if (s.type === ZoneClientStructure.TYPE) {
+                    return true;
+                }
+            }) as Array<ZoneClientStructure>,
+            locations: this.structureManager.getClientStructures().filter(s => {
+                if (s.type === GoToTargetClientStructure.TYPE) {
+                    return true;
+                }
+            }) as Array<GoToTargetClientStructure>
         });
     }
 
@@ -154,6 +173,8 @@ class EditMap extends Map<EditMapProps, EditMapState> {
                     case VirtualWallClientStructure.TYPE:
                     case NoGoAreaClientStructure.TYPE:
                     case NoMopAreaClientStructure.TYPE:
+                    case ZoneClientStructure.TYPE:
+                    case GoToTargetClientStructure.TYPE:
                         this.structureManager.removeClientStructure(s);
                 }
             });
