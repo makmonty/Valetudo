@@ -1,16 +1,22 @@
 import React from "react";
-import {Avatar, IconButton, ListItem, ListItemAvatar, ListItemButton, ListItemText} from "@mui/material";
-import {LoadingButton} from "@mui/lab";
-import ConfirmationDialog from "../ConfirmationDialog";
+import {
+    IconButton,
+    ListItem,
+    ListItemButton,
+    ListItemText
+} from "@mui/material";
 import { Preset } from "../../settings/presets/ZonePresets";
 import { ArrowForwardIos, Delete, Edit } from "@mui/icons-material";
+import {Link} from "react-router-dom";
 
 export const PresetListItem: React.FunctionComponent<{
     preset: Preset,
     url: string,
+    onEdit: (preset: Preset) => void
 }> = ({
     preset,
-    url
+    url,
+    onEdit
 }): JSX.Element => {
     return (
         <>
@@ -18,7 +24,8 @@ export const PresetListItem: React.FunctionComponent<{
                 disableGutters
             >
                 <ListItemButton
-                    href={url}
+                    component={Link}
+                    to={url}
                 >
                     <ListItemText
                         primary={preset.name}
@@ -27,7 +34,7 @@ export const PresetListItem: React.FunctionComponent<{
                     />
                     <ArrowForwardIos/>
                 </ListItemButton>
-                <IconButton>
+                <IconButton onClick={() => {return onEdit(preset)}}>
                     <Edit/>
                 </IconButton>
                 <IconButton>

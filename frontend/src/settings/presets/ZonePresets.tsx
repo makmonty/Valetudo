@@ -19,11 +19,15 @@ const ZonePresets = () => {
     const [selectedZone, setSelectedZone] = useState<Preset | null>(null);
 
     const addZone = () => {
-        setSelectedZone({
+        editZone({
             name: '',
             description: '',
             data: []
         });
+    }
+
+    const editZone = (zone: Preset) => {
+        setSelectedZone(zone);
         setShowEditDialog(true);
     }
 
@@ -53,7 +57,12 @@ const ZonePresets = () => {
             secondaryHeader="All the zones saved"
             listItems={
                 zones.map((zone, index) =>
-                    {return <PresetListItem preset={zone} url="" key={index} />}
+                    {return <PresetListItem
+                        preset={zone}
+                        onEdit={editZone}
+                        url={"/settings/presets/zones/" + zone.id}
+                        key={index}
+                    />}
                 )
             }
         />

@@ -90,6 +90,12 @@ const SettingsRouter = (): JSX.Element => {
             <Route exact path={path + "/presets/zones"}>
                 <ZonePresets/>
             </Route>
+            <Route exact path={path + "/presets/zones/:zoneId"}>
+                <EditMapPage mode="zones" />
+            </Route>
+            <Route exact path={path + "/presets/locations/:locationId"}>
+                <EditMapPage mode="locations" />
+            </Route>
             <Route path="*">
                 <h3>Unknown route</h3>
             </Route>
