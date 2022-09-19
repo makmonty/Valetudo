@@ -437,6 +437,43 @@ class EditMap extends Map<EditMapProps, EditMapState> {
                         }}
                     />
                 }
+                {
+                    this.props.mode === 'zones' &&
+
+                    <ZoneActions
+                        zones={[]}
+                        convertPixelCoordinatesToCMSpace={(coordinates => {
+                            return this.structureManager.convertPixelCoordinatesToCMSpace(coordinates);
+                        })}
+
+                        onAdd={() => {
+                            const currentCenter = this.getCurrentViewportCenterCoordinatesInPixelSpace();
+
+                            const p0 = {
+                                x: currentCenter.x -15,
+                                y: currentCenter.y -15
+                            };
+                            const p1 = {
+                                x: currentCenter.x +15,
+                                y: currentCenter.y +15
+                            };
+
+                            this.structureManager.addClientStructure(new ZoneClientStructure(
+                                p0.x, p0.y,
+                                p1.x, p1.y,
+                                true
+                            ));
+
+                            this.updateState();
+
+                            this.draw();
+                        }}
+                        onClear={() => {
+                            console.log('TODO: Delete all zones');
+                        }}
+                    />
+
+                }
             </ActionsContainer>
 
             <HelpDialog
